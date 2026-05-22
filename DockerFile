@@ -1,0 +1,32 @@
+# Use a container that has Maven and Java 21 installed
+FROM maven:3.9.6-eclipse-temurin-21 AS build
+
+# Set the working folder inside the container
+WORKDIR /app
+
+# Copy your pom.xml into the container
+COPY pom.xml .
+
+# Download all dependencies
+RUN mvn dependency:go-offline
+
+# Copy your source code into the container
+COPY src ./src
+
+# Build your app into a JAR file
+RUN mvn clean package -DskipTests
+
+# Now start fresh with a smaller container
+FROM eclipse-temurin:21-jre-alpine
+
+# Set working folder again
+WORKDIR /app
+
+# Grab the JAR file from the build stage above
+COPY --from=build /app/target/*.jar app.jar
+
+# Tell Docker this app runs on port 8080
+EXPOSE 8080
+
+# This is the command that starts your app
+ENTRYPOINT ["java", "-jar", "app.jar"]

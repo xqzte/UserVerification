@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+
+  # Your PostgreSQL database container
+  postgres:
+    image: postgres:16
+    container_name: verification_db
+    environment:
+      POSTGRES_DB: verificationdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Your Spring Boot app container
+  app:
+    build: .
+    container_name: verification_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/verificationdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JWT_SECRET: your_secret_key_here_make_it_long
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
