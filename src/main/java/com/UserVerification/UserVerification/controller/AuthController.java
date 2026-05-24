@@ -3,7 +3,7 @@ package com.UserVerification.UserVerification.controller;
 import com.UserVerification.UserVerification.dto.LoginRequest;
 import com.UserVerification.UserVerification.dto.LoginResponse;
 import com.UserVerification.UserVerification.dto.RegistrationRequest;
-import com.UserVerification.UserVerification.entity.User;
+import com.UserVerification.UserVerification.dto.RegistrationResponse;
 import com.UserVerification.UserVerification.enums.VerificationStatus;
 import com.UserVerification.UserVerification.service.AuthService;
 import com.UserVerification.UserVerification.service.VerificationService;
@@ -28,10 +28,10 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(
+    public ResponseEntity<RegistrationResponse> register(
             @Valid @RequestBody RegistrationRequest request) {
-        User user = authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        com.UserVerification.UserVerification.dto.RegistrationResponse response = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")

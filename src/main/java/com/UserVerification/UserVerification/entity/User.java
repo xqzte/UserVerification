@@ -2,6 +2,7 @@ package com.UserVerification.UserVerification.entity;
 
 import com.UserVerification.UserVerification.enums.Role;
 import com.UserVerification.UserVerification.enums.VerificationStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 
@@ -11,9 +12,8 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
 
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, unique = true)
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -26,24 +26,23 @@ public class User {
     @Enumerated(EnumType.STRING)
     private VerificationStatus verificationStatus;
 
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     private boolean isActive;
 
     private boolean isVerified;
 
-//    public User(Long id, String fullName, VerificationStatus status, String password) {
-//        this.id = id;
-//        this.fullName = fullName;
-//        this.status = status;
-//        this.password = password;
-//    }
-
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     public Long getId() {
         return id;
@@ -52,7 +51,6 @@ public class User {
     public void setId(Long id) {
         this.id = id;
     }
-
 
     public String getEmail() {
         return email;
@@ -74,7 +72,7 @@ public class User {
         return verificationStatus;
     }
 
-    public void setVerificationStatus(VerificationStatus status) {
+    public void setVerificationStatus(VerificationStatus verificationStatus) {
         this.verificationStatus = verificationStatus;
     }
 

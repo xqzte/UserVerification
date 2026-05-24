@@ -3,6 +3,7 @@ package com.UserVerification.UserVerification.service;
 import com.UserVerification.UserVerification.dto.LoginRequest;
 import com.UserVerification.UserVerification.dto.LoginResponse;
 import com.UserVerification.UserVerification.dto.RegistrationRequest;
+import com.UserVerification.UserVerification.dto.RegistrationResponse;
 import com.UserVerification.UserVerification.entity.User;
 import com.UserVerification.UserVerification.enums.Role;
 import com.UserVerification.UserVerification.enums.VerificationStatus;
@@ -29,7 +30,7 @@ public class AuthService {
     }
 
     @Transactional
-    public User register(RegistrationRequest request) {
+    public RegistrationResponse register(RegistrationRequest request) {
 
         // block admin self registration
         if (request.getRole() == Role.ADMIN) {
@@ -37,7 +38,15 @@ public class AuthService {
                     "Admin accounts cannot be self registered");
         }
 
-        // check if email already exists
+        // block if someone tries to register with the admin email
+        if (userRepository.findByEmail(request.getEmail())
+                .filter(u -> u.getRole() == Role.ADMIN)
+                .isPresent()) {
+            throw new IllegalArgumentException(
+                    "This email is not available");
+        }
+
+        // block duplicate emails
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException(
                     "Email is already registered");
@@ -50,9 +59,16 @@ public class AuthService {
         user.setRole(Role.USER);
         user.setVerificationStatus(VerificationStatus.PENDING);
 
-        return userRepository.save(user);
-    }
+        User savedUser = userRepository.save(user);
 
+        return new RegistrationResponse(
+                savedUser.getId(),
+                savedUser.getFullName(),
+                savedUser.getEmail(),
+                savedUser.getRole(),
+                savedUser.getVerificationStatus()
+        );
+    }
     @Transactional
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())

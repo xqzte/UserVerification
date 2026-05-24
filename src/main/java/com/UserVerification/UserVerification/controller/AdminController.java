@@ -31,14 +31,14 @@ public class AdminController {
         return ResponseEntity.ok(verificationService.getPendingUsers());
     }
 
-    @PatchMapping("/users/{email}/status")
+    @PatchMapping("/users/{id}/status")
     public ResponseEntity<User> updateStatus(
-            @PathVariable String email,
+            @PathVariable Long id,
             @RequestBody Map<String, String> body) {
         VerificationStatus newStatus = VerificationStatus
                 .valueOf(body.get("status").toUpperCase());
         User updated = verificationService
-                .updateVerificationStatus(email, newStatus);
+                .updateVerificationStatus(id, newStatus);
         return ResponseEntity.ok(updated);
     }
 }
