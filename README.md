@@ -19,10 +19,10 @@ A containerised REST API built with Java and Spring Boot that manages user verif
 
 3. Set environment variables
    DB_USERNAME=postgres
-   DB_PASSWORD=postgres
-   JWT_SECRET=mySecretKeyHereMakeItLongEnough123456789
-   ADMIN_EMAIL=admin@verification.com
-   ADMIN_PASSWORD=Admin1234
+   DB_PASSWORD=Anonymous67
+   JWT_SECRET=mySecretKeyHereMakeItLongEnough123456
+   ADMIN_EMAIL=bilalidris011@gmail.com
+   ADMIN_PASSWORD=Anonymous67
    ADMIN_USERNAME=System Admin
 
 4. Run the application
@@ -51,7 +51,34 @@ No additional setup needed. Docker Compose handles the database and application 
 
 ---
 
+## Default Admin Credentials
+
+The system automatically creates an admin user on startup.
+
+| Variable | Default Value |
+|---|---|
+| ADMIN_EMAIL | bilalidris011@gmail.com |
+| ADMIN_PASSWORD | Anonymous67 |
+
+To login as admin:
+POST /api/auth/login
+{
+"email": "bilalidris011@gmail.com",
+"password": "Anonymous67"
+}
+
+---
+
 ## API Endpoints
+
+### Core Verification Endpoints (Brief Specification)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /verify | Accepts userId and category, returns verification status object |
+| GET | /status/{userId} | Returns current verification status for a user |
+| PATCH | /status/{userId} | Updates verification status (PENDING, APPROVED, REJECTED, CANCELLED) |
+| GET | /health | Returns service status and uptime |
 
 ### Auth Endpoints (Public)
 
@@ -59,7 +86,7 @@ No additional setup needed. Docker Compose handles the database and application 
 |--------|----------|-------------|
 | POST | /api/auth/register | Register a new user |
 | POST | /api/auth/login | Login and receive JWT token |
-| GET | /api/auth/users/{email}/status | Check verification status |
+| GET | /api/auth/users/{email}/status | Check verification status by email |
 
 ### Admin Endpoints (Requires JWT Token with ADMIN role)
 
@@ -67,41 +94,71 @@ No additional setup needed. Docker Compose handles the database and application 
 |--------|----------|-------------|
 | GET | /api/admin/users | Get all users |
 | GET | /api/admin/users/pending | Get all pending users |
-| PATCH | /api/admin/users/{id}/status | Update a user's verification status |
+| PATCH | /api/admin/users/{id}/status | Update a user verification status |
 
-### Example Request — Register
-POST /api/auth/register
+---
+
+## Example Requests
+
+### POST /verify
 ```json
 {
+    "userId": "1",
+    "category": "identity"
+}
+```
+Response:
+```json
+{
+    "userId": 1,
+    "category": "identity",
+    "status": "PENDING",
+    "email": "john@email.com",
+    "fullName": "John Doe"
+}
+```
+
+### GET /status/{userId}
+Response:
+```json
+{
+    "userId": 1,
+    "email": "john@email.com",
     "fullName": "John Doe",
-    "email": "john@email.com",
-    "password": "password123"
+    "status": "PENDING"
 }
 ```
 
-### Example Request — Login
-POST /api/auth/login
-```json
-{
-    "email": "john@email.com",
-    "password": "password123"
-}
-```
-
-### Example Request — Update Status (Admin only)
-PATCH /api/admin/users/1/status
-Authorization: Bearer eyJhbGci...
+### PATCH /status/{userId}
 ```json
 {
     "status": "APPROVED"
 }
 ```
+Response:
+```json
+{
+    "userId": 1,
+    "email": "john@email.com",
+    "fullName": "John Doe",
+    "status": "APPROVED"
+}
+```
+
+### GET /health
+Response:
+```json
+{
+    "status": "UP",
+    "uptime": "0 hours 5 minutes 30 seconds"
+}
+```
 
 ### Verification Status Values
-- PENDING — default on registration
-- APPROVED — admin approved the user
-- REJECTED — admin rejected the user
-- CANCELLED — verification was cancelled
+- PENDING — default status on registration
+- APPROVED — verification approved
+- REJECTED — verification rejected
+- CANCELLED — verification cancelled
 
 ---
 
