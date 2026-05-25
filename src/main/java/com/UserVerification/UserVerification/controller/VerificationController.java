@@ -69,4 +69,41 @@ public class VerificationController {
     }
 
 
+    // PATCH /status/:userId
+    @PatchMapping("/status/{userId}")
+    public ResponseEntity<Map<String, Object>> updateStatus(
+            @PathVariable Long userId,
+            @RequestBody Map<String, String> body) {
+
+        String status = body.get("status");
+
+        if (status == null || status.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "status", 400,
+                    "message", "status is required"
+            ));
+        }
+
+        VerificationStatus newStatus;
+        try {
+            newStatus = VerificationStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "status", 400,
+                    "message", "Invalid status value. Must be PENDING, APPROVED, REJECTED or CANCELLED"
+            ));
+        }
+
+        User updated = verificationService.updateVerificationStatus(userId, newStatus);
+
+        return ResponseEntity.ok(Map.of(
+                "userId", updated.getId(),
+                "email", updated.getEmail(),
+                "fullName", updated.getFullName(),
+                "status", updated.getVerificationStatus().name()
+        ));
+    }
+
+
+
 }
