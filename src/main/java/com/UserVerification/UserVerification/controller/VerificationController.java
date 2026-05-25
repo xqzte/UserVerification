@@ -105,5 +105,19 @@ public class VerificationController {
     }
 
 
+    // GET /health (bonus)
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, Object>> health() {
+        long uptimeMillis = ManagementFactory.getRuntimeMXBean().getUptime();
+        Duration uptime = Duration.ofMillis(uptimeMillis);
+
+        return ResponseEntity.ok(Map.of(
+                "status", "UP",
+                "uptime", String.format("%d hours %d minutes %d seconds",
+                        uptime.toHours(),
+                        uptime.toMinutesPart(),
+                        uptime.toSecondsPart())
+        ));
+    }
 
 }
