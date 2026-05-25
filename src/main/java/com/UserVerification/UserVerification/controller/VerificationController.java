@@ -55,4 +55,18 @@ public class VerificationController {
         ));
     }
 
+    // GET /status/:userId
+    @GetMapping("/status/{userId}")
+    public ResponseEntity<Map<String, Object>> getStatus(
+            @PathVariable Long userId) {
+        User user = verificationService.getUserById(userId);
+        return ResponseEntity.ok(Map.of(
+                "userId", user.getId(),
+                "email", user.getEmail(),
+                "fullName", user.getFullName(),
+                "status", user.getVerificationStatus().name()
+        ));
+    }
+
+
 }
