@@ -46,6 +46,11 @@ public class VerificationService {
         return userRepository.findAll();
     }
 
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
     //update the users verification status from PENDING to any other one.
     @Transactional
     public User updateVerificationStatus(Long id, VerificationStatus newStatus) {
